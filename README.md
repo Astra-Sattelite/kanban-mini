@@ -2,6 +2,10 @@
 
 Канбан-доска на **webpack + React + TypeScript** (Node.js 18.18.0).
 
+## Демо
+[Открыть Kanban Mini](https://astra-sattelite.github.io/kanban-mini/)
+
+
 ## Запуск
 
 ```bash
