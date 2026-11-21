@@ -33,11 +33,20 @@ const readStored = (): unknown => {
 
 export const loadTasks = (): Task[] => {
   const stored = readStored();
-  return normalizeTasks(Array.isArray(stored) ? stored : initialTasks);
+
+  if (Array.isArray(stored)) {
+    const valid = normalizeTasks(stored)
+
+    if (valid.length > 0 || stored.length === 0) return valid;
+  }
+
+  return normalizeTasks(initialTasks);
 };
 
 export const saveTasks = (tasks: Task[]): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  } catch {}
+  } catch (error) {
+    console.warn('Не удалось сохранить задачи в localStorage', error);
+  }
 };
