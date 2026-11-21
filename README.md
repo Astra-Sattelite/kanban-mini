@@ -30,4 +30,4 @@ npm run build      # production-сборка в ./dist
 - drag&drop карточек между колонками (нативный HTML5 Drag and Drop);
 - состояние хранится в `localStorage` (ключ `kanban.tasks`); если ключа нет — берутся данные из JSON;
 - поиск: по подстроке в описании (без учёта регистра) или по дате `dd.mm.yyyy` (совпадение с `startDay` или `endDay`);
-- unit-тесты на функцию `isTaskOverdue` (`src/utils/overdue.test.ts`) — `npm run test`.
+- unit-тесты на модули: dates, overdue, storage, tasks — `npm run test`.
