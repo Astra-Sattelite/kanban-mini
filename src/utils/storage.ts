@@ -4,6 +4,8 @@ import initialTasks from '../data/tasks.json';
 
 const STORAGE_KEY = 'kanban.tasks';
 
+export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>;
+
 const taskSchema = z.object({
   id: z.number(),
   type: z.enum(TASK_TYPES),
@@ -22,20 +24,30 @@ export const normalizeTasks = (raw: unknown): Task[] => {
   });
 };
 
-const readStored = (): unknown => {
+const getBrowserStorage = (): KeyValueStorage | null => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    return localStorage;
+  } catch {
+    return null;
+  }
+};
+
+const readStored = (storage: KeyValueStorage | null): unknown => {
+  if (!storage) return null;
+
+  try {
+    const stored = storage.getItem(STORAGE_KEY);
     return stored === null ? null : JSON.parse(stored);
   } catch {
     return null;
   }
 };
 
-export const loadTasks = (): Task[] => {
-  const stored = readStored();
+export const loadTasks = (storage: KeyValueStorage | null = getBrowserStorage()): Task[] => {
+  const stored = readStored(storage);
 
   if (Array.isArray(stored)) {
-    const valid = normalizeTasks(stored)
+    const valid = normalizeTasks(stored);
 
     if (valid.length > 0 || stored.length === 0) return valid;
   }
@@ -43,9 +55,11 @@ export const loadTasks = (): Task[] => {
   return normalizeTasks(initialTasks);
 };
 
-export const saveTasks = (tasks: Task[]): void => {
+export const saveTasks = (tasks: Task[], storage: KeyValueStorage | null = getBrowserStorage()): void => {
+  if (!storage) return;
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    storage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   } catch (error) {
     console.warn('Не удалось сохранить задачи в localStorage', error);
   }
