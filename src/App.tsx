@@ -17,36 +17,38 @@ const COLUMNS: { type: TaskType; title: string; icon: ReactNode }[] = [
 export const App = () => {
   const [tasks, setTasks] = useState<Task[]>(loadTasks);
   const [query, setQuery] = useState('');
-  const [draftId, setDraftId] = useState<number | null>(null);
+  const [draft, setDraft] = useState<Task | null>(null);
 
   useEffect(() => {
-    saveTasks(tasks.filter((task) => task.id !== draftId));
-  }, [tasks, draftId]);
+    saveTasks(tasks);
+  }, [tasks]);
 
   const groups = useMemo(() => groupByType(filterTasks(tasks, query)), [tasks, query]);
 
   const handleAdd = () => {
+    if (draft) return;
+
     const today = startOfDay(Date.now()).getTime();
     const id = tasks.reduce((max, task) => Math.max(max, task.id), 0) + 1;
     setQuery('');
-    setTasks((prev) => [...prev, { id, type: 'todo', startDay: today, endDay: today, text: '' }]);
-    setDraftId(id);
+    setDraft({ id, type: 'todo', startDay: today, endDay: today, text: '' });
   };
 
   const handleSave = (updated: Task) => {
+    if (draft && updated.id === draft.id) {
+      setTasks((prev) => [...prev, updated]);
+      setDraft(null);
+      return;
+    }
     setTasks((prev) => prev.map((task) => (task.id === updated.id ? updated : task)));
-    if (updated.id === draftId) setDraftId(null);
   };
 
   const handleCancelEdit = (id: number) => {
-    if (id !== draftId) return;
-    setTasks((prev) => prev.filter((task) => task.id !== id));
-    setDraftId(null);
+    if (draft?.id === id) setDraft(null);
   };
 
   const handleDelete = (id: number) => {
     setTasks((prev) => prev.filter((task) => task.id !== id));
-    if (id === draftId) setDraftId(null);
   };
 
   const handleMove = (id: number, type: TaskType) => {
@@ -68,7 +70,7 @@ export const App = () => {
             title={title}
             icon={icon}
             tasks={groups[type]}
-            draftId={draftId}
+            draft={type === 'todo' ? draft : null}
             onAdd={type === 'todo' ? handleAdd : undefined}
             onSave={handleSave}
             onDelete={handleDelete}

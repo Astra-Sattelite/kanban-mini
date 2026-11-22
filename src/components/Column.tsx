@@ -7,7 +7,7 @@ interface Props {
   title: string;
   icon: ReactNode;
   tasks: Task[];
-  draftId: number | null;
+  draft: Task | null;
   onAdd?: () => void;
   onSave: (task: Task) => void;
   onDelete: (id: number) => void;
@@ -15,7 +15,18 @@ interface Props {
   onMove: (id: number, type: TaskType) => void;
 }
 
-export const Column = ({ type, title, icon, tasks, draftId, onAdd, onSave, onDelete, onCancelEdit, onMove }: Props) => {
+export const Column = ({
+  type,
+  title,
+  icon,
+  tasks,
+  draft,
+  onAdd,
+  onSave,
+  onDelete,
+  onCancelEdit,
+  onMove
+}: Props) => {
   const [dragOver, setDragOver] = useState(false);
 
   return (
@@ -49,11 +60,20 @@ export const Column = ({ type, title, icon, tasks, draftId, onAdd, onSave, onDel
       </header>
 
       <div className="column__list">
+        {draft && (
+          <TaskCard
+            key={draft.id}
+            task={draft}
+            startInEditing
+            onSave={onSave}
+            onDelete={onDelete}
+            onCancelEdit={onCancelEdit}
+          />
+        )}
         {tasks.map((task) => (
           <TaskCard
             key={task.id}
             task={task}
-            startInEditing={task.id === draftId}
             onSave={onSave}
             onDelete={onDelete}
             onCancelEdit={onCancelEdit}
